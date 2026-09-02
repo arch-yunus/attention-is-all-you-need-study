@@ -5,6 +5,12 @@
 
 ---
 
+<div align="center">
+  <img src="../assets/transformer_architecture.jpg" alt="Transformer Mimarisi" width="85%" />
+</div>
+
+---
+
 ## 1. Encoder ve Decoder'ın Rol Dağılımı
 
 Orijinal 2017 Transformer mimarisi bir **Dizi Dönüşüm (Sequence-to-Sequence)** modelidir (örn. İngilizce $\to$ Almanca çevirisi). Bu yapı iki ana organdan oluşur:

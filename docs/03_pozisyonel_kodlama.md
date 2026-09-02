@@ -5,6 +5,14 @@
 
 ---
 
+<div align="center">
+  <img src="../assets/positional_encoding.jpg" alt="Sinüzoidal Pozisyonel Kodlama" width="85%" />
+  <br><br>
+  <img src="../assets/positional_encoding_heatmap.png" alt="Pozisyonel Kodlama Isı Haritası" width="90%" />
+</div>
+
+---
+
 ## 1. Permütasyon Eşdeğişirliği (Permutation Equivariance) Problemi
 
 Self-attention mekanizması doğası gereği bir **küme (set) işlemcisidir**. Eğer bir girdideki kelimelerin sırasını rastgele karıştırırsanız, dikkat ağırlıkları da aynı şekilde yer değiştirir; ancak model hangi kelimenin önce, hangisinin sonra geldiğini anlayamaz:

@@ -1,9 +1,15 @@
+<div align="center">
+
 # attention-is-all-you-need-study
+
+![Attention Is All You Need Banner](assets/banner.jpg)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python: 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
 [![PyTorch: 2.0+](https://img.shields.io/badge/PyTorch-2.0%2B-ee4c2c.svg)](https://pytorch.org/)
 [![Tests: Passing](https://img.shields.io/badge/Tests-11%20Passing-brightgreen.svg)](tests/)
+
+</div>
 
 > *"Dizi dönüşüm modellerinin hâkimi olan yaklaşımlar; bir kodlayıcı (encoder) ve kod çözücü (decoder) içeren karmaşık tekrarlayan (recurrent) veya evrişimli (convolutional) sinir ağlarına dayanmaktadır. En yüksek başarıma sahip modeller dahi kodlayıcı ile kod çözücüyü bir dikkat mekanizması üzerinden birbirine bağlar. Biz bu çalışmada; tekrarlı döngüleri ve evrişimleri tamamen bir kenara bırakan, bütünüyle dikkat mekanizmalarına dayalı yeni ve yalın bir ağ mimarisi olan Transformer'ı öneriyoruz."*  
 > — **Ashish Vaswani vd. (Google Brain & Google Research, 2017)**
@@ -117,32 +123,16 @@ $$\text{Var}(S) = \sum_{i=1}^{d_k} \text{Var}(q_i k_i) = \sum_{i=1}^{d_k} 1 = d_
 
 ## 4. Multi-Head Attention (Çok Başlı Temsil Mekaniği)
 
+<div align="center">
+  <img src="assets/multi_head_attention.jpg" alt="Multi-Head Attention Mekanizması" width="85%" />
+</div>
+
 > *"Tek bir dikkat fonksiyonunu $d_{model}$ boyutundaki sorgular, anahtarlar ve değerlerle çalıştırmak yerine; sorgu, anahtar ve değerleri $h$ kez farklı ve öğrenilmiş doğrusal projeksiyonlarla doğrusal olarak yansıtmanın faydalı olduğunu gördük... Çok başlı dikkat, modelin farklı konumlardaki farklı temsil alt uzaylarındaki bilgilere aynı anda odaklanabilmesini sağlar."*  
 > — **Makaleden Alıntı: Bölüm 3.2.2**
 
 $$\text{MultiHead}(Q, K, V) = \text{Concat}(\text{head}_1, \dots, \text{head}_h)W^O$$
 
 $$\text{head}_i = \text{Attention}(QW_i^Q, KW_i^K, VW_i^V)$$
-
-```
-Girdi: [Batch, Seq_Len, d_model]
-          │
-          ├──> Doğrusal (W_Q) ──> [Batch, Seq_Len, h, d_k] ──> Transpose ──> [Batch, h, Seq_Len, d_k]
-          ├──> Doğrusal (W_K) ──> [Batch, Seq_Len, h, d_k] ──> Transpose ──> [Batch, h, Seq_Len, d_k]
-          └──> Doğrusal (W_V) ──> [Batch, Seq_Len, h, d_v] ──> Transpose ──> [Batch, h, Seq_Len, d_v]
-                                                                                   │
-                                                          [ Scaled Dot-Product Attention ]
-                                                                                   │
-                                                                       [Batch, h, Seq_Len, d_v]
-                                                                                   │
-                                                                Yeniden Boyutlandırma & Birlestirme
-                                                                                   │
-                                                                       [Batch, Seq_Len, d_model]
-                                                                                   │
-                                                                             Doğrusal (W_O)
-                                                                                   │
-                                                                                Çıktı
-```
 
 * **Tek Baş Kısıtı:** Tek bir dikkat başı, kelimelerin ilişkilerini tek bir ağırlıklı ortalama matrisine zorlar.
 * **Alt Uzay Dağılımı:** Çoklu başlar sayesinde:
@@ -154,6 +144,10 @@ Girdi: [Batch, Seq_Len, d_model]
 ---
 
 ## 5. Sinüzoidal Pozisyonel Kodlama (Positional Encoding)
+
+<div align="center">
+  <img src="assets/positional_encoding.jpg" alt="Sinüzoidal Pozisyonel Kodlama" width="85%" />
+</div>
 
 > *"Modelimiz yineleme (recurrence) ve evrişim (convolution) içermediğinden, dizilimdeki token'ların sırasından faydalanabilmesi için dizideki token'ların göreli ya da mutlak konumlarına dair bazı bilgileri modele enjekte etmemiz gerekir."*  
 > — **Makaleden Alıntı: Bölüm 3.5**
@@ -179,10 +173,21 @@ $$PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{model}}}\right)$$
 
 ---
 
-## 7. Depo Yapısı ve Müfredat
+## 7. Model Mimarisi ve Depo Yapısı
+
+<div align="center">
+  <img src="assets/transformer_architecture.jpg" alt="Transformer Mimarisi" width="85%" />
+</div>
 
 ```text
 attention-is-all-you-need-study/
+├── assets/                                # Görseller, Banner ve Bilimsel Çizimler
+│   ├── banner.jpg                         # Depo ana başlık afişi
+│   ├── transformer_architecture.jpg       # Tam Transformer mimarisi şeması
+│   ├── multi_head_attention.jpg           # Çok başlı dikkat 3D diyagramı
+│   ├── positional_encoding.jpg            # Pozisyonel frekans dalgaları görseli
+│   ├── positional_encoding_heatmap.png    # Matplotlib PE ısı haritası ve benzerlik matrisi
+│   └── noam_lr_curve.png                  # Noam öğrenme oranı ısınma eğrisi grafiği
 ├── docs/                                  # Ayrıntılı Akademik Dokümantasyon
 │   ├── 00_tarihsel_baglam.md             # LSTM/RNN kısıtları ve donanım darboğazları
 │   ├── 01_matematiksel_temeller.md       # İç çarpım varyansı, türevler ve softmax doyumu

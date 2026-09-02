@@ -5,6 +5,12 @@
 
 ---
 
+<div align="center">
+  <img src="../assets/multi_head_attention.jpg" alt="Multi-Head Attention Mimarisi" width="85%" />
+</div>
+
+---
+
 ## 1. Neden Tek Bir Baş (Single Head) Yetersizdir?
 
 Tek başlı (single-head) bir dikkat katmanında, iki kelime arasındaki benzerlik tek bir skalar ağırlıkla ($0$ ile $1$ arasında) özetlenir. 
