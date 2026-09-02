@@ -1,6 +1,8 @@
 # 01. Matematiksel Temeller: Scaled Dot-Product Attention ve Gradyan Analizi
 
-> *"Büyük $d_k$ değerlerinde iç çarpımların büyüklüğü aşırı artar ve bu durum softmax fonksiyonunu son derece küçük eğimlere (gradyanlara) sahip bölgelere iter. Bu etkiyi bertaraf etmek için iç çarpımları $1/\sqrt{d_k}$ ile ölçekliyoruz."*  
+> *"We suspect that for large values of $d_k$, the dot products grow large in magnitude, pushing the softmax function into regions where it has extremely small gradients. To counteract this effect, we scale the dot products by $\frac{1}{\sqrt{d_k}}$."*  
+>  
+> *"Büyük $d_k$ değerlerinde iç çarpımların büyüklüğü aşırı artar ve bu durum softmax fonksiyonunu son derece küçük eğimlere (gradyanlara) sahip bölgelere iter. Bu etkiyi bertaraf etmek için iç çarpımları $\frac{1}{\sqrt{d_k}}$ ile ölçekliyoruz."*  
 > — **Vaswani et al., 2017 (Bölüm 3.2.1)**
 
 ---

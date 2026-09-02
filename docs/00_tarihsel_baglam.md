@@ -38,6 +38,11 @@ x_3 ──> [ RNN ] ──> h_3
 
 ### 2.2 Bellek Uçurumu ve Bilgi Kaybı (Vanishing Gradient & Information Bottleneck)
 
+> *"A potential issue with this encoder-decoder approach is that a neural network needs to be able to compress all the necessary information of a source sentence into a fixed-length vector. This may make it difficult for the neural network to cope with long sentences, particularly those that are longer than the sentences in the training corpus."*  
+>  
+> *"Bu kodlayıcı-kod çözücü yaklaşımındaki potansiyel sorun; bir sinir ağının kaynak cümlenin tüm gerekli bilgisini sabit uzunlukta tek bir vektöre sıkıştırmak zorunda olmasıdır. Bu durum, özellikle eğitim kümesindekilerden daha uzun olan cümlelerle başa çıkmayı sinir ağı için son derece zorlaştırabilir."*  
+> — **Dzmitry Bahdanau, Kyunghyun Cho, Yoshua Bengio (ICLR 2015)**
+
 Encoder-Decoder RNN mimarisinde (Sutskever et al., 2014; Cho et al., 2014), kaynak cümlenin tüm anlamı tek bir sabit boyutlu vektöre ($h_T$) sıkıştırılmak zorundaydı:
 
 $$x_1, x_2, \dots, x_T \xrightarrow{\text{RNN Encoder}} h_T \xrightarrow{\text{RNN Decoder}} y_1, y_2, \dots, y_{T'}$$

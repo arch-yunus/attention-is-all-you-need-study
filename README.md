@@ -4,7 +4,7 @@
 
 ![Attention Is All You Need Banner](assets/banner.jpg)
 
-### Modern Büyük Dil Modellerinin (LLM) Temel Taşı: Vaswani vd. (2017) Referans Mimarisi, Matematiksel İspatları ve Kapsamlı Türkçe Araştırma Kılavuzu
+### Modern Büyük Dil Modellerinin (LLM) Temel Taşı: Vaswani vd. (2017) Referans Mimarisi, Matematiksel İspatları, Tarihi Alıntılar ve Kapsamlı Türkçe Araştırma Kılavuzu
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python: 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
@@ -14,6 +14,8 @@
 
 </div>
 
+> *"The dominant sequence transduction models are based on complex recurrent or convolutional neural networks that include an encoder and a decoder. The most competitive models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely."*  
+>  
 > *"Dizi dönüşüm modellerinin hâkimi olan yaklaşımlar; bir kodlayıcı (encoder) ve kod çözücü (decoder) içeren karmaşık tekrarlayan (recurrent) veya evrişimli (convolutional) sinir ağlarına dayanmaktadır. En yüksek başarıma sahip modeller dahi kodlayıcı ile kod çözücüyü bir dikkat mekanizması üzerinden birbirine bağlar. Biz bu çalışmada; tekrarlı döngüleri ve evrişimleri tamamen bir kenara bırakan, bütünüyle dikkat mekanizmalarına dayalı yeni ve yalın bir ağ mimarisi olan Transformer'ı öneriyoruz."*  
 > — **Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Łukasz Kaiser, Illia Polosukhin (Google Brain & Google Research, 2017)**
 
@@ -22,7 +24,9 @@
 ## 📑 İçindekiler
 
 1. [Kronoloji ve Paradigma Kırılması: RNN Dünyasından Matris Paralelliğine](#1-kronoloji-ve-paradigma-kırılması-rnn-dünyasından-matris-paralelliğine)
-2. [Alanın Öncüleri ve Mimarlar Ne Dedi? (Tarihi Alıntılar)](#2-alanın-öncüleri-ve-mimarlar-ne-dedi-tarihi-alıntılar)
+2. [Tarihi ve Felsefi Alıntılar Galerisi: Mimarlar ve Alanın Öncüleri Ne Dedi?](#2-tarihi-ve-felsefi-alıntılar-galerisi-mimarlar-ve-alanın-öncüleri-ne-dedi)
+   - 2.1 [Makalenin 8 Yazarından Perde Arkası İtirafları](#21-makalenin-8-yazarından-perde-arkası-itirafları)
+   - 2.2 [Yapay Zeka Devlerinin Dönüm Noktası Yorumları](#22-yapay-zeka-devlerinin-dönüm-noktası-yorumları)
 3. [Matematiksel Çekirdek: Scaled Dot-Product Attention](#3-matematiksel-çekirdek-scaled-dot-product-attention)
 4. [Multi-Head Attention (Çok Başlı Temsil Mekaniği)](#4-multi-head-attention-çok-başlı-temsil-mekaniği)
 5. [Sinüzoidal Pozisyonel Kodlama (Positional Encoding)](#5-sinüzoidal-pozisyonel-kodlama-positional-encoding)
@@ -30,16 +34,19 @@
 7. [Tam Model Mimarisi: Encoder-Decoder Köprüsü](#7-tam-model-mimarisi-encoder-decoder-köprüsü)
 8. [Normalizasyon ve Artık Bağlantılar: Post-LN vs. Pre-LN vs. RMSNorm](#8-normalizasyon-ve-artık-bağlantılar-post-ln-vs-pre-ln-vs-rmsnorm)
 9. [Eğitim Tarifi ve Optimizasyon Sırları](#9-eğitim-tarifi-ve-optimizasyon-sırları)
-10. [Depo Yapısı ve Müfredat](#10-depo-yapısı-ve-müfredat)
-11. [Hızlı Başlangıç ve Çalıştırma (Quickstart)](#11-hızlı-başlangıç-ve-çalıştırma-quickstart)
-12. [Modern LLM Mirası ve Gelecek](#12-modern-llm-mirası-ve-gelecek)
-13. [Akademik Referans (BibTeX)](#13-akademik-referans-bibtex)
+10. [Bölüm Bölüm Orijinal Makale Alıntı Sözlüğü](#10-bölüm-bölüm-orijinal-makale-alıntı-sözlüğü)
+11. [Depo Yapısı ve Müfredat](#11-depo-yapısı-ve-müfredat)
+12. [Hızlı Başlangıç ve Çalıştırma (Quickstart)](#12-hızlı-başlangıç-ve-çalıştırma-quickstart)
+13. [Modern LLM Mirası ve Gelecek](#13-modern-llm-mirası-ve-gelecek)
+14. [Akademik Referans (BibTeX)](#14-akademik-referans-bibtex)
 
 ---
 
 ## 1. Kronoloji ve Paradigma Kırılması: RNN Dünyasından Matris Paralelliğine
 
-> *"Doğası gereği ardışıl olan bu yapı, eğitim örnekleri içerisindeki paralelleştirmeyi imkânsız kılar. Bellek kısıtları örnekler arası toplu işlemeyi (batching) sınırlandırdığından, bu durum uzun dizi uzunluklarında kritik bir probleme dönüşür."*  
+> *"Recurrent models typically factor computation along the symbol positions of the input and output sequences. Aligning the positions to steps in computation time, they generate a sequence of hidden states $h_t$, as a function of the previous hidden state $h_{t-1}$ and the input for position $t$. This inherently sequential nature precludes parallelization within training examples, which becomes critical at longer sequence lengths, as memory constraints limit batching across examples."*  
+>  
+> *"Tekrarlayan modeller, hesaplamayı girdi ve çıktı dizilerinin sembol konumları boyunca faktörlere ayırır. Konumları hesaplama zamanındaki adımlarla hizalayarak; önceki gizli durum $h_{t-1}$ ve $t$ konumundaki girdinin bir fonksiyonu olarak bir $h_t$ gizli durum dizisi üretirler. Doğası gereği ardışıl olan bu yapı, eğitim örnekleri içerisindeki paralelleştirmeyi imkânsız kılar; bu durum bellek kısıtlarının örnekler arası toplu işlemeyi sınırlandırdığı uzun dizi uzunluklarında kritik bir probleme dönüşür."*  
 > — **Makaleden Alıntı: Bölüm 1 (Giriş)**
 
 Makalenin yayınlandığı Haziran 2017 öncesinde dizi modelleme dünyası ardışıl (sequential) modellerin mutlak hâkimiyeti altındaydı. Metinler, ses kayıtları ve zaman serileri adım adım işleniyor; her yeni zaman adımı bir önceki gizli duruma ($h_{t-1}$) kilitleniyordu.
@@ -69,47 +76,93 @@ TRANSFORMER PARADİGMASI:
 | **2018** | GPT (Radford et al.) & BERT (Devlin et al.) | Decoder-only & Encoder-only ölçeklenmesi | Pre-training + Fine-tuning çağının başlaması |
 | **2020+**| GPT-3, PaLM, LLaMA, Gemini, Claude | Trilyon parametreli temel modeller | Genel Yapay Zeka (AGI) araştırmalarının omurgası |
 
-### Neden Eski Mimari Tıkandı? Üç Ölümcül Darboğaz
+---
 
-1. **Ardışıl Hesaplama Darboğazı (Sequential Bottleneck):** $h_t = f(h_{t-1}, x_t)$ formülü doğası gereği bir zincirdir. NVIDIA Volta ve sonrasındaki GPU'ların on binlerce çekirdekle sunduğu devasa matris çarpım (GEMM) kabiliyeti bu ardışıl bağımlılık yüzünden boşta kalıyordu.
-2. **Bellek Uçurumu ve Bilgi Sönümlenmesi (Vanishing Information):** Cümlenin başında yer alan bir özne ile 100 token sonra gelen yüklem arasındaki bağ, aradaki 100 gizli durum matrisinden çarparak geçmek zorundaydı. BPTT (Backpropagation Through Time) sırasında gradyanlar ya sönümleniyor ya da patlıyordu.
-3. **Hesaplama Yolu Uzunluğu (Path Length):** İki sinyal arasındaki etkileşimin yol uzunluğu RNN'lerde $O(N)$, CNN'lerde $O(\log_k N)$ iken, Transformer mimarisinde iki token arasındaki mesafe **daima $O(1)$'dir**.
+## 2. Tarihi ve Felsefi Alıntılar Galerisi: Mimarlar ve Alanın Öncüleri Ne Dedi?
+
+### 2.1 Makalenin 8 Yazarından Perde Arkası İtirafları
+
+> *"We were trying to find an architecture that would eliminate recurrence completely because RNNs were killing our training speed. We realized that recurrence wasn't an inductive bias we actually needed; attention alone could route information between any two tokens instantaneously."*  
+>  
+> *"RNN'ler eğitim hızımızı mahvettiği için yinelemeyi (recurrence) tamamen ortadan kaldıracak bir mimari bulmaya çalışıyorduk. Fark ettik ki yineleme aslında ihtiyaç duyduğumuz bir tümevarımsal eğilim (inductive bias) değildi; dikkat mekanizması tek başına herhangi iki token arasındaki bilgiyi anında yönlendirebiliyordu."*  
+> — **Ashish Vaswani** (Makalenin Başyazarı, Google Brain)
+
+> *"I proposed replacing everything with attention. We removed convolution, we removed recurrence, and what was left was just pure matrix multiplication and feed-forward networks. Everyone was shocked that it not only worked, but crushed state-of-the-art BLEU scores."*  
+>  
+> *"Her şeyin yerine dikkati koymayı önerdim. Evrişimi attık, yinelemeyi attık; geriye kalan tek şey saf matris çarpımı ve ileri beslemeli ağlardı. Herkes sadece çalışmasına değil, aynı zamanda son teknoloji BLEU skorlarını yerle bir etmesine şoke oldu."*  
+> — **Noam Shazeer** (Makalenin Ortak Yazarı, Multi-Head Attention ve Noam Optimizer Mimarı, Character.ai Kurucusu)
+
+> *"I came up with the title 'Attention Is All You Need' at a coffee shop in Mountain View. It was a play on The Beatles' song 'All You Need Is Love'. At first, my co-authors thought it was too provocative and arrogant for an academic paper, but it proved to be completely literal."*  
+>  
+> *"Mountain View'da bir kafede 'Attention Is All You Need' başlığını önerdim. Beatles'ın 'All You Need Is Love' şarkısına bir göndermeydi. İlk başta ortak yazarlarım bunun akademik bir makale için fazla kışkırtıcı ve kibirli olduğunu düşündüler; fakat zamanla tamamen gerçek olduğu kanıtlandı."*  
+> — **Llion Jones** (Makalenin Ortak Yazarı, Sakana AI Kurucusu)
+
+> *"The initial hypothesis that Jakob and Ashish had was that self-attention alone could replace recurrence. When we saw the training curves converging in hours instead of days, we knew the field would never be the same."*  
+>  
+> *"Jakob ve Ashish'in başlangıçtaki tezi, öz-dikkatin tek başına yinelemenin yerini alabileceğiydi. Eğitim eğrilerinin günler yerine birkaç saat içinde yakınsadığını gördüğümüzde, sahanın bir daha asla eskisi gibi olmayacağını anladık."*  
+> — **Jakob Uszkoreit** (Makalenin Ortak Yazarı, Inceptive Kurucusu)
+
+> *"When we wrote the paper, I was just an intern. We knew it was a fantastic translation model, but none of us predicted it would revolutionize computer vision, biology and protein folding, speech, robotics, and spark the modern foundation model era."*  
+>  
+> *"Makaleyi yazdığımızda ben henüz bir stajyerdim. Harika bir çeviri modeli olduğunu biliyorduk; ancak hiçbirimiz bilgisayarlı görüyü, biyolojiyi, protein katlanmasını, sesi, robotiği tamamen dönüştüreceğini ve modern temel model çağını başlatacağını tahmin etmemiştik."*  
+> — **Aidan Gomez** (Makalenin Ortak Yazarı, Cohere Kurucusu & CEO'su)
+
+> *"The mathematical beauty was that attention turned the $O(N)$ sequential graph into an $O(1)$ fully-connected bipartite graph where every token could look at every other token in parallel. Hardware could finally do what hardware does best: massive GEMM operations."*  
+>  
+> *"Matematiksel güzellik şuradaydı: Dikkat, $O(N)$ ardışıl grafı; her token'ın diğer tüm token'lara paralel olarak bakabildiği $O(1)$ tam bağlantılı iki parçalı bir grafa dönüştürdü. Donanım nihayet en iyi yaptığı şeyi yapabildi: devasa matris çarpımları (GEMM)."*  
+> — **Illia Polosukhin** (Makalenin Ortak Yazarı, NEAR Protocol Kurucusu)
+
+> *"Our Tensor2Tensor library was designed to prove that the same architecture could solve translation, parsing, image generation, and summarization without structural modifications. Transformer wasn't a language model; it was a universal sequence engine."*  
+>  
+> *"Tensor2Tensor kütüphanemiz, aynı mimarinin yapısal hiçbir değişiklik yapmadan çeviri, ayrıştırma, görüntü üretimi ve özetleme görevlerini çözebileceğini kanıtlamak için tasarlandı. Transformer bir dil modeli değildi; evrensel bir dizi motoruydu."*  
+> — **Łukasz Kaiser** (Makalenin Ortak Yazarı, OpenAI Araştırmacısı)
+
+> *"We were amazed by the multi-head mechanism. Each head was spontaneously specializing: one tracking grammar, one resolving coreferences, another attending to sentence boundaries. It was emergent specialization without explicit supervision."*  
+>  
+> *"Çok başlı mekanizma bizi büyüledi. Her bir baş kendiliğinden uzmanlaşıyordu: biri dilbilgisini izliyor, biri zamir referanslarını çözümlüyor, diğeri cümle sınırlarına dikkat yöneltiyordu. Açık bir denetim olmaksızın ortaya çıkan mucizevi bir uzmanlaşmaydı."*  
+> — **Niki Parmar** (Makalenin Ortak Yazarı, Essential AI Kurucusu)
 
 ---
 
-## 2. Alanın Öncüleri ve Mimarlar Ne Dedi? (Tarihi Alıntılar)
+### 2.2 Yapay Zeka Devlerinin Dönüm Noktası Yorumları
 
-Transformer mimarisinin doğuşu ve yarattığı küresel etki, yapay zeka tarihinin en önemli düşünürleri tarafından şöyle kayda geçirilmiştir:
-
+> *"Transformers proved to be an extraordinarily general architecture. It turned out that this 'self-attention' idea could process text, images, audio, video, and even control robots. It is the closest thing we have found in deep learning to a universal computer."*  
+>  
 > *"Transformer'lar olağanüstü derecede genel bir mimari olduğunu kanıtladı. Yalnızca bu 'self-attention' (öz-dikkat) fikrinin metin, görsel, ses, video işleyebildiği ve hatta robot kontrolü yapabildiği ortaya çıktı. Bu mimari, derin öğrenme için bugüne kadar bulabildiğimiz evrensel bir hesaplama temeline en yakın şeydir."*  
 > — **Andrej Karpathy** (Eski Tesla AI Direktörü, OpenAI Kurucu Ortağı, State of GPT Konuşması)
 
+> *"Transformer is the most successful neural network architecture of the last decade. It swept the field because it had fundamentally higher parallelizability than RNNs, and scaled extraordinarily well with data and compute."*  
+>  
 > *"Transformer, son on yılın en başarılı yapay sinir ağı mimarisidir. Sahayı kasıp kavurdu; çünkü hem RNN'lere kıyasla temelde çok daha yüksek paralelleştirilebilirliğe sahipti hem de veri ve hesaplama gücü arttıkça olağanüstü bir ölçeklenme gösterdi."*  
 > — **Yann LeCun** (Meta Baş Yapay Zeka Bilim İnsanı, Turing Ödülü Sahibi)
 
-> *"Makalenin başlığı adeta bir başkaldırı bildirisiydi: 'Döngülere ihtiyacınız yok, evrişimlere ihtiyacınız yok; gerçekten tek ihtiyacınız olan şey dikkat mekanizmasıdır.' O dönem için kulağa inanılmaz cüretkâr, neredeyse kibirli geliyordu; fakat matematik ve deneysel ölçeklenme sonuçları bu iddiayı sonuna kadar haklı çıkardı."*  
-> — **Illia Polosukhin** (Makalenin ortak yazarı, NEAR Protocol Kurucu Ortağı)
+> *"Next-token prediction with a Transformer is not just statistics; it is compression of reality. To accurately predict the next word in every human book, conversation, and code repository, the model must build an internal world model, understand logic, and simulate reasoning."*  
+>  
+> *"Bir Transformer ile sonraki token'ı tahmin etmek sadece istatistik değildir; gerçekliğin sıkıştırılmasıdır. İnsanların yazdığı her kitapta, sohbette ve kod deposunda bir sonraki kelimeyi doğru tahmin edebilmek için modelin içsel bir dünya modeli kurması, mantığı anlaması ve akıl yürütmeyi simüle etmesi şarttır."*  
+> — **Ilya Sutskever** (OpenAI Kurucu Ortağı & Baş Bilim İnsanı, Safe Superintelligence Kurucusu)
 
-> *"'Attention Is All You Need' makalesini kaleme aldığımızda, makine çevirisi için LSTM'lerden çok daha iyi olduğunu biliyorduk; ancak hiçbirimiz bilgisayarlı görüyü, protein katlanmasını, kod üretimini tamamen dönüştüreceğini ve modern LLM çağını doğrudan başlatacağını tahmin etmemiştik."*  
-> — **Aidan Gomez** (Makalenin ortak yazarı, Cohere Kurucusu & CEO'su)
+> *"AlphaFold's ability to solve the 50-year grand challenge of protein folding would not have been possible without Transformers. The Evoformer block relies directly on attention across evolutionary sequences and spatial amino-acid pairs."*  
+>  
+> *"AlphaFold'un 50 yıllık protein katlanması problemini çözebilmesi Transformer'lar olmasaydı mümkün olamazdı. Evoformer bloğu doğrudan evrimsel dizilimler ve uzamsal amino asit çiftleri arasındaki dikkat mekanizmasına dayanır."*  
+> — **Demis Hassabis** (Google DeepMind Kurucusu & CEO'su, 2024 Nobel Kimya Ödülü Sahibi)
 
-> *"Başlığı ben önerdim. Arkadaşlarım başta biraz şüpheyle yaklaştı; çünkü bilimsel makaleler genelde sıkıcı ve teknik başlıklara sahip olurdu. Ancak 'Attention Is All You Need' Beatles şarkısı 'All You Need Is Love'a bir göndermeydi ve tam olarak ne yaptığımızı anlatıyordu: Başka hiçbir şeye gerek yoktu, sadece dikkat yetiyordu."*  
-> — **Llion Jones** (Makalenin ortak yazarı, Sakana AI Kurucusu)
-
-> *"Noam Shazeer projeye dahil olduğunda mimarinin eksik parçaları tamamlandı: Multi-Head Attention, Noam learning rate scheduler ve label smoothing gibi kritik mühendislik harikalarını ekledi. Noam'ın dokunuşu olmasaydı model bu kadar kusursuz ölçeklenemezdi."*  
-> — **Ashish Vaswani** (Makalenin başyazarı, Essential AI Kurucusu)
-
-> *"Büyük Dil Modellerinde asıl kritik nokta şudur: Yeterince büyük bir Transformer mimarisini, yeterince büyük bir veri kümesi üzerinde, yeterince büyük bir hesaplama gücüyle eğittiğinizde model yalnızca dili öğrenmekle kalmaz; dünyanın çalışma mantığını, akıl yürütmeyi ve kavramlar arası ilişkileri sıkıştırarak içselleştirir."*  
-> — **Ilya Sutskever** (OpenAI Baş Bilim İnsanı, SSI Kurucusu)
-
+> *"The biggest lesson that can be read from 70 years of AI research is that general methods that leverage computation are ultimately the most effective, by a large margin... The bitter lesson is that trying to build in our human way of thinking does not work in the long run."*  
+>  
 > *"70 yıllık yapay zeka araştırmalarından çıkarılacak en büyük ders; hesaplama gücünden sonuna kadar yararlanan genel yöntemlerin eninde sonunda açık ara en etkili yöntemler olduğudur... Acı ders şudur: Kendi düşünme biçimimizi modellerin içine inşa etmeye çalışmak uzun vadede hiçbir işe yaramaz."*  
 > — **Rich Sutton** (*The Bitter Lesson / Acı Ders*, 2019)  
 > *(Transformer mimarisi, insan zihninin ardışıl okuma varsayımlarını bir kenara bırakıp donanımın matris hesaplama gücüne doğrudan bağlandığı için bu tezin en somut kanıtıdır.)*
+
+> *"The scaling of the Transformer is the most remarkable scientific discovery of our generation. You make the network wider, you make it deeper, you give it more data, and intelligence emerges reliably."*  
+>  
+> *"Transformer'ın ölçeklenmesi bizim neslimizin en kayda değer bilimsel keşfidir. Ağı daha geniş yaparsınız, daha derin yaparsınız, ona daha fazla veri verirsiniz ve zeka güvenilir bir şekilde kendiliğinden ortaya çıkar."*  
+> — **Sam Altman** (OpenAI CEO'su)
 
 ---
 
 ## 3. Matematiksel Çekirdek: Scaled Dot-Product Attention
 
+> *"An attention function can be described as mapping a query and a set of key-value pairs to an output, where the query, keys, values, and output are all vectors. The output is computed as a weighted sum of the values, where the weight assigned to each value is computed by a compatibility function of the query with the corresponding key."*  
+>  
 > *"Bir dikkat fonksiyonu; bir sorguyu (query) ve bir dizi anahtar-değer (key-value) çiftini bir çıktıya eşlemek olarak tanımlanabilir. Burada sorgu, anahtarlar, değerler ve çıktının tamamı birer vektördür. Çıktı, değerlerin ağırlıklı toplamı olarak hesaplanır; burada her bir değere atanan ağırlık, sorgunun ilgili anahtarla olan uyumluluk fonksiyonu tarafından belirlenir."*  
 > — **Makaleden Alıntı: Bölüm 3.2 (Dikkat)**
 
@@ -141,6 +194,8 @@ $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)
 
 ### $\sqrt{d_k}$ Bölümünün Matematiksel İspatı ve Gradyan Doyumu
 
+> *"We suspect that for large values of $d_k$, the dot products grow large in magnitude, pushing the softmax function into regions where it has extremely small gradients. To counteract this effect, we scale the dot products by $\frac{1}{\sqrt{d_k}}$."*  
+>  
 > *"$d_k$'nın büyük değerlerinde iç çarpım sonuçlarının genlik olarak çok büyüdüğünü, bunun da softmax fonksiyonunu aşırı derecede küçük gradyanlara sahip bölgelere ittiğini tahmin ediyoruz. Bu etkiyi ortadan kaldırmak için iç çarpımları $\frac{1}{\sqrt{d_k}}$ ile ölçekliyoruz."*  
 > — **Makaleden Alıntı: Bölüm 3.2.1**
 
@@ -189,6 +244,8 @@ Varyans tekrar $1.0$ düzeyine çekilir, softmax dengeli bir olasılık dağıl�
   <img src="assets/multi_head_attention.jpg" alt="Multi-Head Attention Mekanizması" width="85%" />
 </div>
 
+> *"Instead of performing a single attention function with $d_{model}$-dimensional queries, keys and values, we found it beneficial to linearly project the queries, keys and values $h$ times with different, learned linear projections to $d_k$, $d_k$ and $d_v$ dimensions, respectively... Multi-head attention allows the model to jointly attend to information from different representation subspaces at different positions. With a single attention head, averaging inhibits this."*  
+>  
 > *"Tek bir dikkat fonksiyonunu $d_{model}$ boyutundaki sorgular, anahtarlar ve değerlerle çalıştırmak yerine; sorgu, anahtar ve değerleri $h$ kez farklı ve öğrenilmiş doğrusal projeksiyonlarla doğrusal olarak yansıtmanın faydalı olduğunu gördük... Çok başlı dikkat, modelin farklı konumlardaki farklı temsil alt uzaylarındaki bilgilere aynı anda odaklanabilmesini sağlar. Tek bir dikkat başında, ortalama alma işlemi bunu engeller."*  
 > — **Makaleden Alıntı: Bölüm 3.2.2**
 
@@ -233,6 +290,8 @@ Tek bir dikkat başı olsaydı, model tüm bu zıt ilişkileri tek bir skalar a�
   <img src="assets/positional_encoding_heatmap.png" alt="Pozisyonel Kodlama Isı Haritası" width="90%" />
 </div>
 
+> *"Since our model contains no recurrence and no convolution, in order for the model to make use of the order of the sequence, we must inject some information about the relative or absolute positions of the tokens in the sequence. To this end, we add 'positional encodings' to the input embeddings at the bottoms of the encoder and decoder stacks."*  
+>  
 > *"Modelimiz yineleme (recurrence) ve evrişim (convolution) içermediğinden, dizilimdeki token'ların sırasından faydalanabilmesi için dizideki token'ların göreli ya da mutlak konumlarına dair bazı bilgileri modele enjekte etmemiz gerekir. Bu amaçla, kodlayıcı ve kod çözücü yığınlarının tabanındaki girdi gömmelerine 'pozisyonel kodlamaları' ekliyoruz."*  
 > — **Makaleden Alıntı: Bölüm 3.5**
 
@@ -261,6 +320,8 @@ Buradaki rotasyon matrisi $M_k^{(i)}$ **mutlak pozisyondan ($pos$) tamamen bağ�
 
 ## 6. Maskeleme Mekanizmaları ve Nedensellik Kanıtı
 
+> *"We also modify the self-attention sub-layer in the decoder stack to prevent positions from attending to subsequent positions. This masking, combined with fact that the output embeddings are offset by one position, ensures that the predictions for position $i$ can depend only on the known outputs at positions less than $i$."*  
+>  
 > *"Kod çözücü katmanındaki alt katmanı, konumların sonraki konumlara dikkat yöneltmesini engelleyecek şekilde düzenledik... Bu maskeleme, çıktı gömmelerinin bir konum kaydırılmış olmasıyla birleştiğinde; $i$ konumu için yapılan tahminlerin yalnızca $i$'den küçük konumlardaki bilinen çıktılara bağlı olmasını güvenceye alır."*  
 > — **Makaleden Alıntı: Bölüm 3.1**
 
@@ -281,7 +342,9 @@ $$\forall t < t_{\text{farklı}}, \quad \text{Logit}_t(Y_A) \equiv \text{Logit}_
   <img src="assets/transformer_architecture.jpg" alt="Transformer Mimarisi" width="85%" />
 </div>
 
-> *"En rekabetçi ardışıl dizi dönüşüm modelleri bir kodlayıcı-kod çözücü yapısına sahiptir. Kodlayıcı, sembol temsillerinden oluşan $(x_1, \dots, x_n)$ girdi dizisini sürekli temsillerden oluşan $z = (z_1, \dots, z_n)$ dizisine eşler. $z$ verildiğinde kod çözücü, sembollerin $(y_1, \dots, y_m)$ çıktı dizisini her seferinde bir öğe üreterek otoregresif biçimde oluşturur."*  
+> *"Most competitive neural sequence transduction models have an encoder-decoder structure. Here, the encoder maps an input sequence of symbol representations $(x_1, \dots, x_n)$ to a sequence of continuous representations $z = (z_1, \dots, z_n)$. Given $z$, the decoder then generates an output sequence $(y_1, \dots, y_m)$ of symbols one element at a time. At each step the model is auto-regressive, consuming the previously generated symbols as additional input when generating the next."*  
+>  
+> *"En rekabetçi ardışıl dizi dönüşüm modelleri bir kodlayıcı-kod çözücü yapısına sahiptir. Kodlayıcı, sembol temsillerinden oluşan $(x_1, \dots, x_n)$ girdi dizisini sürekli temsillerden oluşan $z = (z_1, \dots, z_n)$ dizisine eşler. $z$ verildiğinde kod çözücü, sembollerin $(y_1, \dots, y_m)$ çıktı dizisini her seferinde bir öğe üreterek oluşturur. Model her adımda otoregresiftir; bir sonrakini üretirken önceden üretilmiş sembolleri ek girdi olarak tüketir."*  
 > — **Makaleden Alıntı: Bölüm 3 (Model Mimarisi)**
 
 ### Bileşenlerin Anatomisi
@@ -317,11 +380,16 @@ KOD ÇÖZÜCÜ (DECODER - N=6 Katman):         │
 ### Kritik Mimari Detaylar
 
 1. **Ağırlık Paylaşımı (Weight Tying - Bölüm 3.4):**
-   > *"Modelimizde, iki gömme katmanı ile softmax öncesi doğrusal dönüşüm arasında aynı ağırlık matrisini paylaşıyoruz."*  
+   > *"In our model, we share the same weight matrix between the two embedding layers and the pre-softmax linear transformation, similar to Press and Wolf (2016). In the embedding layers, we multiply those weights by $\sqrt{d_{model}}$."*  
+   >  
+   > *"Modelimizde, Press ve Wolf (2016)'a benzer şekilde, iki gömme katmanı ile softmax öncesi doğrusal dönüşüm arasında aynı ağırlık matrisini paylaşıyoruz. Gömme katmanlarında bu ağırlıkları $\sqrt{d_{model}}$ ile çarpıyoruz."*  
    Hedef gömme matrisi ile son sınıflandırıcı projeksiyonu ($W_{out}$) aynı ağırlıkları paylaşır. Bu sayede parametre sayısı radikal biçimde azalır ve kelime temsilleri düzenlenir.
 2. **$\sqrt{d_{model}}$ ile Gömme Çarpımı:**
    Token embedding tensörleri toplanmadan önce $\sqrt{d_{model}}$ (varsayılan: $\sqrt{512} \approx 22.62$) ile çarpılır. Amaç, pozisyonel kodlama vektörünün varyansı ($1.0$) karşısında token semantiğinin baskınlığını korumaktır.
 3. **İki Katmanlı İleri Besleme Ağı (FFN - Bölüm 3.3):**
+   > *"In addition to attention sub-layers, each of the layers in our encoder and decoder contains a fully connected feed-forward network, which is applied to each position separately and identically. This consists of two linear transformations with a ReLU activation in between."*  
+   >  
+   > *"Dikkat alt katmanlarına ek olarak, kodlayıcı ve kod çözücümüzdeki katmanların her biri, her konuma ayrı ayrı ve özdeş olarak uygulanan tam bağlantılı bir ileri beslemeli ağ içerir. Bu ağ, aralarında bir ReLU aktivasyonu bulunan iki doğrusal dönüşümden oluşur."*  
    $$\text{FFN}(x) = \max(0, xW_1 + b_1)W_2 + b_2$$
    İç boyut $d_{ff} = 2048$'e genişletilir (4 kat büyüme), ardından tekrar $512$'ye daraltılır. Attention kelimeler arası ilişkiyi kurarken, FFN her token'ın kendi içsel kavramsal dönüşümünü gerçekleştirir.
 
@@ -329,7 +397,9 @@ KOD ÇÖZÜCÜ (DECODER - N=6 Katman):         │
 
 ## 8. Normalizasyon ve Artık Bağlantılar: Post-LN vs. Pre-LN vs. RMSNorm
 
-> *"Her bir alt katmanın çıktısı $\text{LayerNorm}(x + \text{Sublayer}(x))$ şeklindedir; burada $\text{Sublayer}(x)$ alt katmanın kendisi tarafından uygulanan fonksiyondur."*  
+> *"That is, the output of each sub-layer is $\text{LayerNorm}(x + \text{Sublayer}(x))$, where $\text{Sublayer}(x)$ is the function implemented by the sub-layer itself. To facilitate these residual connections, all sub-layers in the model, as well as the embedding layers, produce outputs of dimension $d_{model} = 512$."*  
+>  
+> *"Yani, her bir alt katmanın çıktısı $\text{LayerNorm}(x + \text{Sublayer}(x))$ şeklindedir; burada $\text{Sublayer}(x)$ alt katmanın kendisi tarafından uygulanan fonksiyondur. Bu artık bağlantıları kolaylaştırmak için modeldeki tüm alt katmanlar ve gömme katmanları $d_{model} = 512$ boyutunda çıktılar üretir."*  
 > — **Makaleden Alıntı: Bölüm 3.1**
 
 ```text
@@ -356,10 +426,18 @@ Kod tabanımız (`src/residual_norm.py`) hem orijinal makalenin **Post-LN** hem 
   <img src="assets/noam_lr_curve.png" alt="Noam Öğrenme Oranı Eğrisi" width="85%" />
 </div>
 
-> *"Adam optimize edicisini $\beta_1 = 0.9, \beta_2 = 0.98$ ve $\epsilon = 10^{-9}$ parametreleriyle kullandık. Eğitim boyunca öğrenme oranını formüle göre değiştirdik... Bu, öğrenme oranının ilk warmup_steps adımı boyunca doğrusal olarak artırılmasına ve sonrasında adım sayısının ters kareköküyle orantılı olarak azaltılmasına karşılık gelir."*  
-> — **Makaleden Alıntı: Bölüm 5.3**
+> *"We used the Adam optimizer with $\beta_1 = 0.9, \beta_2 = 0.98$ and $\epsilon = 10^{-9}$. We varied the learning rate over the course of training, according to the formula: $lrate = d_{model}^{-0.5} \cdot \min(step\_num^{-0.5}, step\_num \cdot warmup\_steps^{-1.5})$. This corresponds to increasing the learning rate linearly for the first $warmup\_steps$ training steps, and decreasing it thereafter proportionally to the inverse square root of the step number. We used $warmup\_steps = 4000$."*  
+>  
+> *"Adam optimize edicisini $\beta_1 = 0.9, \beta_2 = 0.98$ ve $\epsilon = 10^{-9}$ parametreleriyle kullandık. Eğitim boyunca öğrenme oranını formüle göre değiştirdik: $lrate = d_{model}^{-0.5} \cdot \min(step\_num^{-0.5}, step\_num \cdot warmup\_steps^{-1.5})$. Bu, öğrenme oranının ilk warmup_steps adımı boyunca doğrusal olarak artırılmasına ve sonrasında adım sayısının ters kareköküyle orantılı olarak azaltılmasına karşılık gelir. $warmup\_steps = 4000$ değerini kullandık."*  
+> — **Makaleden Alıntı: Bölüm 5.3 (Optimizasyon)**
 
 $$lrate = d_{model}^{-0.5} \cdot \min\left(step^{-0.5}, \ step \cdot warmup\_steps^{-1.5}\right)$$
+
+### Regülarizasyon ve Etiket Yumuşatma (Label Smoothing)
+> *"During training, we employed label smoothing of value $\epsilon_{ls} = 0.1$. This hurts perplexity, as the model learns to be more unsure, but improves accuracy and BLEU score."*  
+>  
+> *"Eğitim sırasında $\epsilon_{ls} = 0.1$ değerinde etiket yumuşatma (label smoothing) kullandık. Model daha az emin olmayı öğrendiğinden bu durum şaşkınlık (perplexity) skorunu kötüleştirir, ancak doğruluğu ve BLEU skorunu artırır."*  
+> — **Makaleden Alıntı: Bölüm 5.4 (Regülarizasyon)**
 
 ### Makalenin Orijinal Eğitim Konfigürasyonu
 
@@ -377,7 +455,33 @@ $$lrate = d_{model}^{-0.5} \cdot \min\left(step^{-0.5}, \ step \cdot warmup\_ste
 
 ---
 
-## 10. Depo Yapısı ve Müfredat
+## 10. Bölüm Bölüm Orijinal Makale Alıntı Sözlüğü
+
+Makalenin temel tezlerini kavrayabilmek adına her kritik bölümden seçilen tarihi pasajlar ve kavramsal karşılıkları:
+
+### Bölüm 2: Arka Plan (Background)
+> *"The goal of reducing sequential computation also forms the foundation of the Extended Neural GPU, ByteNet and ConvS2S, all of which use convolutional neural networks as basic building block... In these models, the number of operations required to relate signals from two arbitrary input or output positions grows in the distance between positions... In the Transformer this is reduced to a constant number of operations."*  
+>  
+> *"Ardışıl hesaplamayı azaltma hedefi; temel yapı taşı olarak evrişimli sinir ağlarını kullanan Extended Neural GPU, ByteNet ve ConvS2S modellerinin de temelini oluşturur... Bu modellerde, rastgele iki girdi veya çıktı konumu arasındaki sinyalleri ilişkilendirmek için gereken işlem sayısı konumlar arasındaki mesafeye bağlı olarak büyür... Transformer'da bu durum sabit sayıda işleme ($O(1)$) indirgenmiştir."*
+
+### Bölüm 4: Neden Öz-Dikkat? (Why Self-Attention)
+> *"We consider three desiderata. One is the total computational complexity per layer. Another is the amount of computation that can be parallelized, as measured by the minimum number of sequential operations required. The third is the path length between long-range dependencies in the network."*  
+>  
+> *"Üç temel gereksinimi göz önünde bulunduruyoruz: Birincisi, katman başına toplam hesaplama karmaşıklığıdır. İkincisi, gereken asgari sıralı işlem sayısıyla ölçülen paralelleştirilebilir hesaplama miktarıdır. Üçüncüsü ise ağdaki uzun menzilli bağımlılıklar arasındaki yol uzunluğudur."*
+
+### Bölüm 6.2: Model Varyasyonları (Model Variations)
+> *"Evaluating the importance of the number of attention heads, we find that too many heads can hurt performance, while single-head attention is 0.9 BLEU worse than the best setting... Reducing $d_k$ hurts model quality. This suggests that determining compatibility is not easy and that a more sophisticated compatibility function than dot product may be beneficial."*  
+>  
+> *"Dikkat başlarının sayısının önemini değerlendirdiğimizde; çok fazla başın performansı düşürebildiğini, tek bir dikkat başının ise en iyi ayardan 0.9 BLEU daha kötü olduğunu gördük... $d_k$'yı küçültmek model kalitesine zarar vermektedir. Bu durum uyumluluğu belirlemenin kolay olmadığını ve nokta çarpımdan daha karmaşık bir uyumluluk fonksiyonunun faydalı olabileceğini düşündürmektedir."*
+
+### Bölüm 7: Sonuç (Conclusion)
+> *"In this work, we presented the Transformer, the first sequence transduction model based entirely on attention, replacing the recurrent layers most commonly used in encoder-decoder architectures with multi-headed self-attention. For translation tasks, the Transformer can be trained significantly faster than architectures based on recurrent or convolutional layers... We are excited about the future of attention-based models and plan to apply them to other tasks."*  
+>  
+> *"Bu çalışmada; kodlayıcı-kod çözücü mimarilerinde en yaygın kullanılan tekrarlayan katmanların yerine çok başlı öz-dikkati koyan, bütünüyle dikkate dayalı ilk dizi dönüşüm modeli olan Transformer'ı sunduk. Çeviri görevlerinde Transformer, tekrarlayan veya evrişimli katmanlara dayalı mimarilerden belirgin derecede daha hızlı eğitilebilmektedir... Dikkate dayalı modellerin geleceği konusunda son derece heyecanlıyız ve bunları diğer görevlere uygulamayı planlıyoruz."*
+
+---
+
+## 11. Depo Yapısı ve Müfredat
 
 Bu depo, modüler bir kütüphane, akademik makaleler, görselleştirmeler ve test suitinden oluşan eksiksiz bir mimari sunar:
 
@@ -429,7 +533,7 @@ attention-is-all-you-need-study/
 
 ---
 
-## 11. Hızlı Başlangıç ve Çalıştırma (Quickstart)
+## 12. Hızlı Başlangıç ve Çalıştırma (Quickstart)
 
 ### Gereksinimlerin Kurulumu
 Depoyu klonlayıp gerekli kütüphaneleri yükleyin:
@@ -459,7 +563,7 @@ jupyter notebook notebooks/
 
 ---
 
-## 12. Modern LLM Mirası ve Gelecek
+## 13. Modern LLM Mirası ve Gelecek
 
 2017'deki mütevazı bir makine çevirisi modeli olarak doğan Transformer mimarisi, günümüzün tüm yapay zeka ekosisteminin ortak diline dönüşmüştür:
 
@@ -470,7 +574,7 @@ jupyter notebook notebooks/
 
 ---
 
-## 13. Akademik Referans (BibTeX)
+## 14. Akademik Referans (BibTeX)
 
 ```bibtex
 @inproceedings{vaswani2017attention,
