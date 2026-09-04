@@ -15,6 +15,7 @@ import torch.nn as nn
 from .multi_head_attention import MultiHeadAttention
 from .feed_forward import PositionwiseFeedForward
 from .residual_norm import SublayerConnection, LayerNorm
+from .kv_cache import TransformerKVCache, LayerKVCache
 
 
 class DecoderLayer(nn.Module):
@@ -56,6 +57,8 @@ class DecoderLayer(nn.Module):
         memory: torch.Tensor,
         src_mask: Optional[torch.Tensor] = None,
         tgt_mask: Optional[torch.Tensor] = None,
+        self_cache: Optional[LayerKVCache] = None,
+        cross_cache: Optional[LayerKVCache] = None,
     ) -> torch.Tensor:
         """
         İleri besleme.
@@ -65,15 +68,23 @@ class DecoderLayer(nn.Module):
             memory (torch.Tensor): Encoder çıktısı, [Batch, Seq_Len_Src, d_model]
             src_mask (Optional[torch.Tensor]): Kaynak maskesi (Padding), [Batch, 1, 1, Seq_Len_Src]
             tgt_mask (Optional[torch.Tensor]): Hedef maskesi (Causal + Padding), [Batch, 1, Seq_Len_Tgt, Seq_Len_Tgt]
+            self_cache (Optional[LayerKVCache]): Öz-dikkat için KV önbellek
+            cross_cache (Optional[LayerKVCache]): Çapraz dikkat için KV önbellek
 
         Returns:
             torch.Tensor: Decoder katman çıktısı, [Batch, Seq_Len_Tgt, d_model]
         """
         # 1. Alt Katman: Masked Self-Attention (Gelecekteki kelimeleri görmesi engellenir)
-        x = self.sublayer_1(x, lambda _x: self.self_attn(_x, _x, _x, mask=tgt_mask)[0])
+        x = self.sublayer_1(
+            x,
+            lambda _x: self.self_attn(_x, _x, _x, mask=tgt_mask, kv_cache=self_cache, is_cross_attention=False)[0],
+        )
 
         # 2. Alt Katman: Cross-Attention (Q hedef diziden, K ve V kaynak diziden gelir)
-        x = self.sublayer_2(x, lambda _x: self.cross_attn(_x, memory, memory, mask=src_mask)[0])
+        x = self.sublayer_2(
+            x,
+            lambda _x: self.cross_attn(_x, memory, memory, mask=src_mask, kv_cache=cross_cache, is_cross_attention=True)[0],
+        )
 
         # 3. Alt Katman: Feed-Forward
         x = self.sublayer_3(x, self.feed_forward)
@@ -120,6 +131,7 @@ class Decoder(nn.Module):
         memory: torch.Tensor,
         src_mask: Optional[torch.Tensor] = None,
         tgt_mask: Optional[torch.Tensor] = None,
+        kv_cache: Optional[TransformerKVCache] = None,
     ) -> torch.Tensor:
         """
         Tüm decoder katmanlarını sırayla çalıştırır.
@@ -129,9 +141,19 @@ class Decoder(nn.Module):
             memory (torch.Tensor): Encoder çıktısı, [Batch, Seq_Len_Src, d_model]
             src_mask (Optional[torch.Tensor]): Kaynak maskesi, [Batch, 1, 1, Seq_Len_Src]
             tgt_mask (Optional[torch.Tensor]): Hedef maskesi, [Batch, 1, Seq_Len_Tgt, Seq_Len_Tgt]
+            kv_cache (Optional[TransformerKVCache]): KV-Önbellek yöneticisi
         """
-        for layer in self.layers:
-            x = layer(x, memory=memory, src_mask=src_mask, tgt_mask=tgt_mask)
+        for i, layer in enumerate(self.layers):
+            self_cache = kv_cache.get_self_attn_cache(i) if kv_cache is not None else None
+            cross_cache = kv_cache.get_cross_attn_cache(i) if kv_cache is not None else None
+            x = layer(
+                x,
+                memory=memory,
+                src_mask=src_mask,
+                tgt_mask=tgt_mask,
+                self_cache=self_cache,
+                cross_cache=cross_cache,
+            )
 
         if self.norm is not None:
             x = self.norm(x)

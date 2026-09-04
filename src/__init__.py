@@ -1,5 +1,5 @@
 """
-Attention Is All You Need - Referans Kütüphanesi.
+Attention Is All You Need - Kapsamlı Referans ve Araştırma Kütüphanesi.
 """
 
 from .scaled_dot_product import ScaledDotProductAttention
@@ -13,8 +13,31 @@ from .transformer import Transformer, Generator
 from .masks import generate_square_subsequent_mask, create_padding_mask, create_masks
 from .optimizer import NoamLR
 from .label_smoothing import LabelSmoothingLoss
+from .kv_cache import TransformerKVCache, LayerKVCache
+from .generation import (
+    greedy_decode,
+    beam_search_decode,
+    sample_decode,
+    apply_sampling_filters,
+)
+from .attention_variants import (
+    MultiQueryAttention,
+    GroupedQueryAttention,
+    RotaryPositionalEmbedding,
+    apply_rotary_emb,
+    compare_attention_memory,
+)
+from .metrics import (
+    compute_bleu,
+    corpus_bleu,
+    calculate_perplexity,
+    exact_match_accuracy,
+    token_accuracy,
+)
+from .trainer import Trainer, TrainerConfig, TrainingHistory
 
 __all__ = [
+    # Orijinal Mimari ve Katmanlar
     "ScaledDotProductAttention",
     "MultiHeadAttention",
     "PositionalEncoding",
@@ -32,4 +55,27 @@ __all__ = [
     "create_masks",
     "NoamLR",
     "LabelSmoothingLoss",
+    # KV-Cache & Çıkarım Algoritmaları
+    "TransformerKVCache",
+    "LayerKVCache",
+    "greedy_decode",
+    "beam_search_decode",
+    "sample_decode",
+    "apply_sampling_filters",
+    # Modern Dikkat Varyantları (LLaMA / Mistral / PaLM)
+    "MultiQueryAttention",
+    "GroupedQueryAttention",
+    "RotaryPositionalEmbedding",
+    "apply_rotary_emb",
+    "compare_attention_memory",
+    # Değerlendirme Metrikleri
+    "compute_bleu",
+    "corpus_bleu",
+    "calculate_perplexity",
+    "exact_match_accuracy",
+    "token_accuracy",
+    # Eğitici ve Kontrol Noktaları
+    "Trainer",
+    "TrainerConfig",
+    "TrainingHistory",
 ]

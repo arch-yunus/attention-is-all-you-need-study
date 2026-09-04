@@ -9,7 +9,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python: 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
 [![PyTorch: 2.0+](https://img.shields.io/badge/PyTorch-2.0%2B-ee4c2c.svg)](https://pytorch.org/)
-[![Tests: Passing](https://img.shields.io/badge/Tests-11%20Passing-brightgreen.svg)](tests/)
+[![Tests: Passing](https://img.shields.io/badge/Tests-23%20Passing-brightgreen.svg)](tests/)
 [![Paper: NeurIPS 2017](https://img.shields.io/badge/NeurIPS%202017-1706.03762-b31b1b.svg)](papers/1706.03762v7.pdf)
 
 </div>
@@ -500,7 +500,10 @@ attention-is-all-you-need-study/
 │   ├── 02_cok_basli_dikkat_geometrisi.md # Alt uzay projeksiyonları ve tensör katlama işlemleri
 │   ├── 03_pozisyonel_kodlama.md          # Dalga boyu spektrumu ve göreli lineer dönüşüm ispatı
 │   ├── 04_encoder_decoder_koprusu.md     # Cross-attention mantığı (Q Decoder'dan, K-V Encoder'dan)
-│   └── 05_layer_norm_ve_residual.md      # Pre-LN vs Post-LN mimari analizleri
+│   ├── 05_layer_norm_ve_residual.md      # Pre-LN vs Post-LN mimari analizleri
+│   ├── 06_cikarim_stratejileri_ve_kv_cache.md # Greedy, Beam Search, Top-p/k ve KV Cache
+│   ├── 07_modern_dikkat_varyantlari_mqa_gqa_rope.md # MQA, GQA ve RoPE matematiği
+│   └── 08_degerlendirme_metrikleri_ve_bleu.md # BLEU, Perplexity ve Exact Match metrikleri
 ├── notebooks/                             # İnteraktif Jupyter Defterleri
 │   ├── 01_adim_adim_tensor_boyutlari.ipynb # Her katmanda tensör boyutlarının adım adım izlenmesi
 │   ├── 02_pozisyonel_dalga_boylari.ipynb   # 10000 tabanlı sin/cos dalga frekans haritaları
@@ -508,23 +511,33 @@ attention-is-all-you-need-study/
 ├── src/                                   # Referans PyTorch İmplementasyonu
 │   ├── __init__.py                       # Modüler dışa aktarım API'si
 │   ├── scaled_dot_product.py             # Saf tensör operasyonlu çekirdek dikkat mekanizması
-│   ├── multi_head_attention.py           # Paralelleştirilmiş projeksiyon matrisleri
-│   ├── positional_encoding.py            # Analitik sinüzoidal pozisyon kodlayıcı
+│   ├── multi_head_attention.py           # Paralelleştirilmiş projeksiyon matrisleri & KV-Cache desteği
+│   ├── positional_encoding.py            # Analitik sinüzoidal pozisyon kodlayıcı & step offset desteği
 │   ├── feed_forward.py                   # Position-wise iki katmanlı MLP bloğu
 │   ├── residual_norm.py                  # Add & LayerNorm (Post-LN ve Pre-LN)
 │   ├── encoder.py                        # N x EncoderLayer mimarisi
-│   ├── decoder.py                        # N x DecoderLayer mimarisi
-│   ├── transformer.py                    # Uçtan uca saf referans modeli
+│   ├── decoder.py                        # N x DecoderLayer mimarisi & KV-Cache desteği
+│   ├── transformer.py                    # Uçtan uca saf referans modeli & create_kv_cache
+│   ├── kv_cache.py                       # LayerKVCache ve TransformerKVCache yöneticileri
+│   ├── generation.py                     # Greedy, Beam Search ve Temperature/Top-p/Top-k kod çözücüler
+│   ├── attention_variants.py             # MQA, GQA, RoPE ve bellek/bant genişliği analizi
+│   ├── metrics.py                        # BLEU skoru, Perplexity ve doğruluk metrikleri
+│   ├── trainer.py                        # Gradient clipping, early stopping ve checkpoint destekli Trainer
 │   ├── masks.py                          # Causal ve Padding maske oluşturucuları
 │   ├── optimizer.py                      # Noam Learning Rate Scheduler (Bölüm 5.3)
 │   └── label_smoothing.py                # Label Smoothing Loss (Bölüm 5.4)
 ├── papers/
 │   └── 1706.03762v7.pdf                  # Orijinal arXiv araştırma makalesi (PDF)
-├── tests/                                 # Kapsamlı Pytest Doğrulama Suiti
+├── tests/                                 # Kapsamlı Pytest Doğrulama Suiti (23 Test)
 │   ├── test_shapes.py                    # Katmanlar arası tensör boyut bütünlüğü testleri
 │   ├── test_causal_mask.py               # Gelecek sızıntısı (leakage) doğrulama testleri
-│   └── test_components.py               # Noam LR, Label Smoothing ve Pre-LN testleri
+│   ├── test_components.py               # Noam LR, Label Smoothing ve Pre-LN testleri
+│   ├── test_generation.py                # Greedy, Beam Search, Top-p ve KV Cache testleri
+│   ├── test_attention_variants.py        # MQA, GQA, RoPE ve bellek karşılaştırma testleri
+│   ├── test_metrics.py                   # BLEU, Perplexity ve Accuracy doğrulama testleri
+│   └── test_trainer.py                   # Trainer eğitim döngüsü ve checkpoint testleri
 ├── example_training.py                    # Uçtan uca sentetik eğitim ve greedy decoding demosu
+├── example_modern_inference.py            # KV-Cache hızlandırma, MQA/GQA bellek ve Beam/Sampling demosu
 ├── requirements.txt                       # Gerekli Python kütüphaneleri
 ├── pytest.ini                             # Test konfigürasyonu
 ├── LICENSE                                # MIT Lisansı
@@ -544,11 +557,17 @@ pip install -r requirements.txt
 ```
 
 ### Test Suitini Çalıştırma
-Tüm katmanların tensör boyutlarını, maskeleme mantığını ve sızıntı testlerini doğrulamak için:
+Tüm mimari katmanları, KV-Cache tutarlılığını, dikkat varyantlarını ve sızıntı testlerini doğrulamak için:
 ```bash
-pytest tests/ -v
+python -m pytest tests/ -v
 ```
-*(11 testin tamamı otomatik olarak çalıştırılır ve doğrulanır).*
+*(23 testin tamamı otomatik olarak çalıştırılır ve doğrulanır).*
+
+### Modern Çıkarım, KV-Cache ve Dikkat Varyantları Kıyaslama Demosu
+KV-Cache hızlanmasını (O(N) vs O(N²)), MQA/GQA bellek tasarruflarını ve Beam Search / Top-p örnekleme stratejilerini test etmek için:
+```bash
+python example_modern_inference.py
+```
 
 ### Sentetik Eğitim Demosunu Çalıştırma
 Sentetik bir dizi kopyalama görevi üzerinde Noam scheduler ve Label Smoothing kullanarak Transformer modelini eğitmek ve otoregresif çıkarımını test etmek için:

@@ -13,6 +13,7 @@ from .encoder import Encoder
 from .decoder import Decoder
 from .positional_encoding import PositionalEncoding
 from .masks import create_masks
+from .kv_cache import TransformerKVCache
 
 
 class Generator(nn.Module):
@@ -63,6 +64,7 @@ class Transformer(nn.Module):
     ) -> None:
         super().__init__()
         self.d_model = d_model
+        self.num_decoder_layers = num_decoder_layers
 
         # Token Embedding Katmanları
         self.src_embed = nn.Embedding(src_vocab_size, d_model)
@@ -107,6 +109,10 @@ class Transformer(nn.Module):
             if p.dim() > 1:
                 nn.init.xavier_uniform_(p)
 
+    def create_kv_cache(self) -> TransformerKVCache:
+        """Kod çözücü katmanları için yeni bir KV-Cache yöneticisi oluşturur."""
+        return TransformerKVCache(num_layers=self.num_decoder_layers)
+
     def encode(self, src: torch.Tensor, src_mask: Optional[torch.Tensor] = None) -> torch.Tensor:
         """
         Kaynak diziyi kodlar.
@@ -122,13 +128,15 @@ class Transformer(nn.Module):
         memory: torch.Tensor,
         src_mask: Optional[torch.Tensor] = None,
         tgt_mask: Optional[torch.Tensor] = None,
+        kv_cache: Optional[TransformerKVCache] = None,
+        step: int = 0,
     ) -> torch.Tensor:
         """
         Hedef diziyi ve bellek (memory) tensörünü kullanarak kod çözer.
         """
         tgt_embedded = self.tgt_embed(tgt) * math.sqrt(self.d_model)
-        x = self.tgt_pos(tgt_embedded)
-        return self.decoder(x, memory=memory, src_mask=src_mask, tgt_mask=tgt_mask)
+        x = self.tgt_pos(tgt_embedded, step=step)
+        return self.decoder(x, memory=memory, src_mask=src_mask, tgt_mask=tgt_mask, kv_cache=kv_cache)
 
     def forward(
         self,

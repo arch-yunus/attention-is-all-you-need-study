@@ -10,6 +10,7 @@ from typing import Optional, Tuple
 import torch
 import torch.nn as nn
 from .scaled_dot_product import ScaledDotProductAttention
+from .kv_cache import LayerKVCache
 
 
 class MultiHeadAttention(nn.Module):
@@ -51,6 +52,8 @@ class MultiHeadAttention(nn.Module):
         key: torch.Tensor,
         value: torch.Tensor,
         mask: Optional[torch.Tensor] = None,
+        kv_cache: Optional[LayerKVCache] = None,
+        is_cross_attention: bool = False,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         İleri besleme adımı.
@@ -60,6 +63,8 @@ class MultiHeadAttention(nn.Module):
             key (torch.Tensor): Anahtar tensörü, şekil: [Batch, Seq_Len_K, d_model]
             value (torch.Tensor): Değer tensörü, şekil: [Batch, Seq_Len_K, d_model]
             mask (Optional[torch.Tensor]): Maskeleme tensörü
+            kv_cache (Optional[LayerKVCache]): Hızlı çıkarım için KV-Cache nesnesi
+            is_cross_attention (bool): Çapraz dikkat olup olmadığı (bellek K/V sabitlemesi için)
 
         Returns:
             Tuple[torch.Tensor, torch.Tensor]:
@@ -68,21 +73,35 @@ class MultiHeadAttention(nn.Module):
         """
         batch_size = query.size(0)
 
-        # 1. Doğrusal Projeksiyonlar: [B, S, d_model] -> [B, S, d_model]
-        # Ardından başlara ayrıştırma ve transpozisyon: [B, S, h, d_k] -> [B, h, S, d_k]
+        # 1. Q Projeksiyonu: [B, Sq, d_model] -> [B, num_heads, Sq, d_k]
         q = self.w_q(query).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
-        k = self.w_k(key).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
-        v = self.w_v(value).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
 
-        # 2. Scaled Dot-Product Attention uygulama
-        # scores: [B, h, Seq_Len_Q, d_k], attn_weights: [B, h, Seq_Len_Q, Seq_Len_K]
+        # 2. K ve V Projeksiyonları (KV-Cache desteği ile)
+        if kv_cache is not None:
+            if is_cross_attention:
+                # Çapraz dikkat: Encoder belleği değişmez, ilk adımda önbelleğe alınır
+                if kv_cache.k is None or kv_cache.v is None:
+                    k = self.w_k(key).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+                    v = self.w_v(value).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+                    k, v = kv_cache.update(k, v)
+                else:
+                    k, v = kv_cache.k, kv_cache.v
+            else:
+                # Öz-dikkat: Her adımda yeni token'ın K/V değerleri önbelleğe eklenir
+                curr_k = self.w_k(key).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+                curr_v = self.w_v(value).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+                k, v = kv_cache.update(curr_k, curr_v)
+        else:
+            k = self.w_k(key).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+            v = self.w_v(value).view(batch_size, -1, self.num_heads, self.d_k).transpose(1, 2)
+
+        # 3. Scaled Dot-Product Attention uygulama
         out, attention_weights = self.attention(q, k, v, mask=mask)
 
-        # 3. Başları birleştirme (Concatenation):
-        # [B, h, Seq_Len_Q, d_k] -> [B, Seq_Len_Q, h, d_k] -> [B, Seq_Len_Q, d_model]
+        # 4. Başları birleştirme (Concatenation):
         out = out.transpose(1, 2).contiguous().view(batch_size, -1, self.d_model)
 
-        # 4. Son doğrusal çıkış projeksiyonu (W^O) ve dropout
+        # 5. Son doğrusal çıkış projeksiyonu (W^O) ve dropout
         output = self.w_o(out)
         if self.dropout is not None:
             output = self.dropout(output)

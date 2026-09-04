@@ -48,18 +48,20 @@ class PositionalEncoding(nn.Module):
         # register_buffer: Modelin state_dict'ine kaydedilir, GPU'ya taşınır ancak gradyan almaz
         self.register_buffer("pe", pe)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, step: int = 0) -> torch.Tensor:
         """
         Token gömmelerine pozisyon bilgisini ekler.
 
         Args:
             x (torch.Tensor): Gömme tensörü, şekil: [Batch, Seq_Len, d_model]
+            step (int): Başlangıç pozisyon indeksi (KV-Cache çıkarımı için)
 
         Returns:
             torch.Tensor: Pozisyon bilgisi eklenmiş tensör, şekil: [Batch, Seq_Len, d_model]
         """
         # x.size(1) kadar pozisyon dilimi alınır ve x'e eklenir
-        x = x + self.pe[:, : x.size(1)].requires_grad_(False)
+        seq_len = x.size(1)
+        x = x + self.pe[:, step : step + seq_len].requires_grad_(False)
         if self.dropout is not None:
             x = self.dropout(x)
         return x
