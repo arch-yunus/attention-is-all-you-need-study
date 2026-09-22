@@ -9,7 +9,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python: 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
 [![PyTorch: 2.0+](https://img.shields.io/badge/PyTorch-2.0%2B-ee4c2c.svg)](https://pytorch.org/)
-[![Tests: Passing](https://img.shields.io/badge/Tests-23%20Passing-brightgreen.svg)](tests/)
+[![Tests: Passing](https://img.shields.io/badge/Tests-35%20Passing-brightgreen.svg)](tests/)
 [![Paper: NeurIPS 2017](https://img.shields.io/badge/NeurIPS%202017-1706.03762-b31b1b.svg)](papers/1706.03762v7.pdf)
 
 </div>
@@ -483,7 +483,7 @@ Makalenin temel tezlerini kavrayabilmek adına her kritik bölümden seçilen ta
 
 ## 11. Depo Yapısı ve Müfredat
 
-Bu depo, modüler bir kütüphane, akademik makaleler, görselleştirmeler ve test suitinden oluşan eksiksiz bir mimari sunar:
+Bu depo, modüler bir kütüphane, akademik makaleler, modern LLM blokları, görselleştirmeler ve 35 testlik kapsamlı bir suit sunar:
 
 ```text
 attention-is-all-you-need-study/
@@ -503,7 +503,11 @@ attention-is-all-you-need-study/
 │   ├── 05_layer_norm_ve_residual.md      # Pre-LN vs Post-LN mimari analizleri
 │   ├── 06_cikarim_stratejileri_ve_kv_cache.md # Greedy, Beam Search, Top-p/k ve KV Cache
 │   ├── 07_modern_dikkat_varyantlari_mqa_gqa_rope.md # MQA, GQA ve RoPE matematiği
-│   └── 08_degerlendirme_metrikleri_ve_bleu.md # BLEU, Perplexity ve Exact Match metrikleri
+│   ├── 08_degerlendirme_metrikleri_ve_bleu.md # BLEU, Perplexity ve Exact Match metrikleri
+│   ├── 09_modern_aktivasyon_ve_rmsnorm.md # RMSNorm, SwiGLU, GeGLU ve DeepNorm matematiği
+│   ├── 10_modern_decoder_only_llm.md     # LLaMA/Mistral tarzı Salt-Dekoder LLM mimarisi
+│   ├── 11_bpe_tokenizasyon_algoritmasi.md # BPE subword tokenizasyonu ve byte fallback
+│   └── 12_ileri_ornekleme_ve_min_p.md    # Min-P örnekleme, Repetition & Frequency Penalty
 ├── notebooks/                             # İnteraktif Jupyter Defterleri
 │   ├── 01_adim_adim_tensor_boyutlari.ipynb # Her katmanda tensör boyutlarının adım adım izlenmesi
 │   ├── 02_pozisyonel_dalga_boylari.ipynb   # 10000 tabanlı sin/cos dalga frekans haritaları
@@ -517,10 +521,14 @@ attention-is-all-you-need-study/
 │   ├── residual_norm.py                  # Add & LayerNorm (Post-LN ve Pre-LN)
 │   ├── encoder.py                        # N x EncoderLayer mimarisi
 │   ├── decoder.py                        # N x DecoderLayer mimarisi & KV-Cache desteği
-│   ├── transformer.py                    # Uçtan uca saf referans modeli & create_kv_cache
+│   ├── transformer.py                    # Uçtan uca saf referans Seq2Seq modeli
+│   ├── decoder_only.py                   # Modern Decoder-Only LLM (RoPE + RMSNorm + SwiGLU + GQA)
+│   ├── modern_layers.py                  # RMSNorm, SwiGLU, GeGLU, DeepNormScale
+│   ├── attention_variants.py             # MQA, GQA, RoPE, ALiBi, Sliding Window, FlashSDPA
+│   ├── tokenizer.py                      # Byte-Pair Encoding (BPE) Subword Tokenizer
 │   ├── kv_cache.py                       # LayerKVCache ve TransformerKVCache yöneticileri
-│   ├── generation.py                     # Greedy, Beam Search ve Temperature/Top-p/Top-k kod çözücüler
-│   ├── attention_variants.py             # MQA, GQA, RoPE ve bellek/bant genişliği analizi
+│   ├── generation.py                     # Greedy, Beam, Top-k, Top-p, Min-p, Repetition Penalty
+│   ├── visualizer.py                     # İnteraktif HTML/JS Dashboard üretici motoru
 │   ├── metrics.py                        # BLEU skoru, Perplexity ve doğruluk metrikleri
 │   ├── trainer.py                        # Gradient clipping, early stopping ve checkpoint destekli Trainer
 │   ├── masks.py                          # Causal ve Padding maske oluşturucuları
@@ -528,16 +536,25 @@ attention-is-all-you-need-study/
 │   └── label_smoothing.py                # Label Smoothing Loss (Bölüm 5.4)
 ├── papers/
 │   └── 1706.03762v7.pdf                  # Orijinal arXiv araştırma makalesi (PDF)
-├── tests/                                 # Kapsamlı Pytest Doğrulama Suiti (23 Test)
+├── tests/                                 # Kapsamlı Pytest Doğrulama Suiti (35 Test)
 │   ├── test_shapes.py                    # Katmanlar arası tensör boyut bütünlüğü testleri
 │   ├── test_causal_mask.py               # Gelecek sızıntısı (leakage) doğrulama testleri
 │   ├── test_components.py               # Noam LR, Label Smoothing ve Pre-LN testleri
+│   ├── test_modern_layers.py             # RMSNorm, SwiGLU, GeGLU, DeepNorm testleri
+│   ├── test_decoder_only.py              # Decoder-Only LLM forward ve KV-Cache üretim testleri
+│   ├── test_alibi_and_sliding_window.py  # ALiBi, Sliding Window ve SDPA testleri
+│   ├── test_tokenizer.py                 # BPE eğitim, serileştirme ve UTF-8 testleri
+│   ├── test_sampling_advanced.py         # Min-P ve ceza mekanizması testleri
 │   ├── test_generation.py                # Greedy, Beam Search, Top-p ve KV Cache testleri
 │   ├── test_attention_variants.py        # MQA, GQA, RoPE ve bellek karşılaştırma testleri
 │   ├── test_metrics.py                   # BLEU, Perplexity ve Accuracy doğrulama testleri
 │   └── test_trainer.py                   # Trainer eğitim döngüsü ve checkpoint testleri
-├── example_training.py                    # Uçtan uca sentetik eğitim ve greedy decoding demosu
-├── example_modern_inference.py            # KV-Cache hızlandırma, MQA/GQA bellek ve Beam/Sampling demosu
+├── example_decoder_only_llm.py            # BPE Tokenizer + Modern Decoder-Only LLM eğitimi ve üretimi
+├── example_comprehensive_benchmark.py     # MHA vs MQA vs GQA vs ALiBi vs SWA vs FlashSDPA benchmark'ı
+├── example_modern_inference.py            # KV-Cache hızlandırma ve Seq2Seq çıkarım demosu
+├── example_training.py                    # Seq2Seq Transformer sentetik eğitim demosu
+├── generate_dashboard.py                  # Tek tıkla interaktif HTML dashboard oluşturucu
+├── dashboard.html                         # Tarayıcıda açılabilir interaktif görsel analiz paneli
 ├── requirements.txt                       # Gerekli Python kütüphaneleri
 ├── pytest.ini                             # Test konfigürasyonu
 ├── LICENSE                                # MIT Lisansı
@@ -556,28 +573,35 @@ cd attention-is-all-you-need-study
 pip install -r requirements.txt
 ```
 
-### Test Suitini Çalıştırma
-Tüm mimari katmanları, KV-Cache tutarlılığını, dikkat varyantlarını ve sızıntı testlerini doğrulamak için:
+### Test Suitini Çalıştırma (35/35 Test)
+Tüm mimari katmanları, KV-Cache tutarlılığını, dikkat varyantlarını, BPE tokenizer'ı ve sızıntı testlerini doğrulamak için:
 ```bash
-python -m pytest tests/ -v
+pytest -v
 ```
-*(23 testin tamamı otomatik olarak çalıştırılır ve doğrulanır).*
+*(35 testin tamamı otomatik olarak çalıştırılır ve doğrulanır).*
 
-### Modern Çıkarım, KV-Cache ve Dikkat Varyantları Kıyaslama Demosu
-KV-Cache hızlanmasını (O(N) vs O(N²)), MQA/GQA bellek tasarruflarını ve Beam Search / Top-p örnekleme stratejilerini test etmek için:
+### Modern Decoder-Only LLM Eğitimi & Çıkarımı
+Sıfırdan BPE Tokenizer eğitip, RoPE + RMSNorm + SwiGLU + GQA içeren bir Decoder-Only modeli eğitmek ve Min-P sampling ile metin üretmek için:
 ```bash
-python example_modern_inference.py
+python example_decoder_only_llm.py
 ```
 
-### Sentetik Eğitim Demosunu Çalıştırma
-Sentetik bir dizi kopyalama görevi üzerinde Noam scheduler ve Label Smoothing kullanarak Transformer modelini eğitmek ve otoregresif çıkarımını test etmek için:
+### Kapsamlı Dikkat ve Donanım Benchmark'ı
+MHA, GQA, MQA, ALiBi, Kayan Pencere (SWA) ve Flash SDPA dikkat mekanizmalarını gecikme (ms), saniye başına token ve VRAM bellek tüketimi açısından karşılaştırmak için:
+```bash
+python example_comprehensive_benchmark.py
+```
+
+### İnteraktif HTML Görselleştirme Panelini Oluşturma
+```bash
+python generate_dashboard.py
+```
+*(Üretilen `dashboard.html` dosyasını herhangi bir web tarayıcısında açarak grafikleri canlı olarak inceleyebilirsiniz).*
+
+### Sentetik Seq2Seq Eğitimi ve Çıkarım
 ```bash
 python example_training.py
-```
-
-### İnteraktif Görselleştirme Defterlerini Başlatma
-```bash
-jupyter notebook notebooks/
+python example_modern_inference.py
 ```
 
 ---
